@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react'
+import { Link } from 'react-router-dom';
 import icon from '../../../assets/icon.svg';
 
 const Home = () => {
@@ -44,6 +45,12 @@ const Home = () => {
                 </span>
                 Donate
               </button>
+              
+              <Link to="/todo">
+                <button type="button">
+                  TODO
+                </button>
+              </Link>
           </div>
         </div>
       )}
