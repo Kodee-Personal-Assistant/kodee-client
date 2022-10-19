@@ -75,6 +75,31 @@ function Todo() {
 
     setText("")
   }
+
+  const deleteItem = (id, droppableId) => {
+    setState(prev => {
+      prev = {...prev}
+      prev[droppableId].items = prev[droppableId].items.filter(item => item.id !== id)
+
+      return prev
+    })
+  }
+
+  const editItem = (id, droppableId, value) => {
+    setState(prev => {
+      prev = {...prev}
+      prev[droppableId].items = prev[droppableId].items.map(item => {
+        if (item.id === id) {
+          item.name = value
+        }
+
+        return item
+      })
+
+      return prev
+    })
+  }
+
   return (
     <div className="todo">
       <div>
@@ -106,7 +131,7 @@ function Todo() {
                                   {...provided.draggableProps}
                                   {...provided.dragHandleProps}
                                 >
-                                  {el.name}
+                                  {el.name} <button type='button' onClick={() => deleteItem(el.id, key)}>Delete</button> <input type="text" onChange={(e)=> editItem(el.id, key,e.target.value)} />
                                 </div>
                               )
                             }}
