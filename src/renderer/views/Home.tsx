@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react'
 import { Link } from 'react-router-dom';
 import icon from '../../../assets/icon.svg';
+import '../styles/home.css'
 
 const Home = () => {
     function getNotification(){
@@ -21,7 +22,7 @@ const Home = () => {
     })
 
     return (
-        <div>
+        <div className='body'>
             <div className="Hello">
             <img width="200" alt="icon" src={icon} />
           </div>

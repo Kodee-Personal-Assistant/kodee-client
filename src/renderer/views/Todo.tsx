@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import {DragDropContext, Droppable, Draggable} from "react-beautiful-dnd";
 import _ from "lodash";
 import {v4} from "uuid";
+import '../styles/todo.css'
 
 const item = {
   id: v4(),
@@ -75,7 +76,7 @@ function Todo() {
     setText("")
   }
   return (
-    <div className="App">
+    <div className="todo">
       <div>
         <input type="text" value={text} onChange={(e) => setText(e.target.value)}/>
         <button type='button' onClick={addItem}>Add</button>
