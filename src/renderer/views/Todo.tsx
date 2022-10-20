@@ -1,154 +1,204 @@
-import React, { useState } from 'react'
-import {DragDropContext, Droppable, Draggable} from "react-beautiful-dnd";
-import _ from "lodash";
-import {v4} from "uuid";
-import '../styles/todo.css'
-
-const item = {
-  id: v4(),
-  name: "Clean the house"
-}
-
-const item2 = {
-  id: v4(),
-  name: "Wash the car"
-}
+import React, { useEffect, useState } from 'react';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import _ from 'lodash';
+import { v4 } from 'uuid';
+import '../styles/todo.css';
 
 function Todo() {
-    const [text, setText] = useState("")
+  const [inputState, setInputState] = useState(true);
+  const [text, setText] = useState('');
   const [state, setState] = useState({
-    "todo": {
-      title: "Todo",
-      items: [item, item2]
+    todo: {
+      title: 'Todo',
+      items: [],
     },
-    "in-progress": {
-      title: "In Progress",
-      items: []
+    'in-progress': {
+      title: 'In Progress',
+      items: [],
     },
-    "done": {
-      title: "Completed",
-      items: []
-    }
-  })
+    done: {
+      title: 'Completed',
+      items: [],
+    },
+  });
 
-  const handleDragEnd = ({destination, source}) => {
+  useEffect(() => {
+    const data = localStorage.getItem('todo');
+    if(data){
+      setState(JSON.parse(data));
+    }
+  }, []);
+
+  const handleDragEnd = ({ destination, source }) => {
     if (!destination) {
-      return
+      return;
     }
 
-    if (destination.index === source.index && destination.droppableId === source.droppableId) {
-      return
+    if (
+      destination.index === source.index &&
+      destination.droppableId === source.droppableId
+    ) {
+      return;
     }
 
     // Creating a copy of item before removing it from state
-    const itemCopy = {...state[source.droppableId].items[source.index]}
+    const itemCopy = { ...state[source.droppableId].items[source.index] };
 
-    setState(prev => {
-      prev = {...prev}
+    setState((prev) => {
+      prev = { ...prev };
       // Remove from previous items array
-      prev[source.droppableId].items.splice(source.index, 1)
-
+      prev[source.droppableId].items.splice(source.index, 1);
 
       // Adding to new items array location
-      prev[destination.droppableId].items.splice(destination.index, 0, itemCopy)
-
-      return prev
-    })
-  }
+      prev[destination.droppableId].items.splice(
+        destination.index,
+        0,
+        itemCopy
+      );
+      
+      return prev;
+    });
+    localStorage.setItem('todo', JSON.stringify(state));
+  };
 
   const addItem = () => {
-    setState(prev => {
+    if(!text) return;
+    setState((prev) => {
       return {
         ...prev,
         todo: {
-          title: "Todo",
+          title: 'Todo',
           items: [
             {
               id: v4(),
-              name: text
+              name: text,
             },
-            ...prev.todo.items
-          ]
-        }
-      }
-    })
+            ...prev.todo.items,
+          ],
+        },
+      };
+    });
 
-    setText("")
-  }
+    setText('');
+    localStorage.setItem('todo', JSON.stringify(state));
+  };
 
   const deleteItem = (id, droppableId) => {
-    setState(prev => {
-      prev = {...prev}
-      prev[droppableId].items = prev[droppableId].items.filter(item => item.id !== id)
+    setState((prev) => {
+      prev = { ...prev };
+      prev[droppableId].items = prev[droppableId].items.filter(
+        (item) => item.id !== id
+      );
 
-      return prev
-    })
-  }
+      return prev;
+    });
+    localStorage.setItem('todo', JSON.stringify(state));   
+  };
+
+  const clearCompleted = () => {
+    setState((prev) => {
+      prev = { ...prev };
+      prev.done.items = [];
+
+      return prev;
+    });
+    localStorage.setItem('todo', JSON.stringify(state));   
+  };
 
   const editItem = (id, droppableId, value) => {
-    setState(prev => {
-      prev = {...prev}
-      prev[droppableId].items = prev[droppableId].items.map(item => {
+    setState((prev) => {
+      prev = { ...prev };
+      prev[droppableId].items = prev[droppableId].items.map((item) => {
         if (item.id === id) {
-          item.name = value
+          item.name = value;
         }
 
-        return item
-      })
+        return item;
+      });
 
-      return prev
-    })
-  }
+      return prev;
+    });
+    localStorage.setItem('todo', JSON.stringify(state));   
+  };
 
   return (
     <div className="todo">
       <div>
-        <input type="text" value={text} onChange={(e) => setText(e.target.value)}/>
-        <button type='button' onClick={addItem}>Add</button>
+        <input
+          type="text"
+          value={text}
+          onChange={(e) => {setText(e.target.value)}}
+        />
+        <button type="button" onClick={addItem}>
+          Add
+        </button>
+        <button type="button" onClick={clearCompleted}>
+          Clear Completed
+        </button>
       </div>
       <DragDropContext onDragEnd={handleDragEnd}>
         {_.map(state, (data, key) => {
-          return(
+          return (
             <div key={key} className="column">
               <h3>{data.title}</h3>
               <Droppable droppableId={key}>
                 {(provided, snapshot) => {
-                  return(
+                  return (
                     <div
                       ref={provided.innerRef}
                       {...provided.droppableProps}
                       className="droppable-col"
                     >
                       {data.items.map((el, index) => {
-                        return(
-                          <Draggable key={el.id} index={index} draggableId={el.id}>
+                        return (
+                          <Draggable
+                            key={el.id}
+                            index={index}
+                            draggableId={el.id}
+                          >
                             {(provided, snapshot) => {
-                              console.log(snapshot)
-                              return(
+                              console.log(snapshot);
+                              return (
                                 <div
-                                  className={`item ${snapshot.isDragging && "dragging"}`}
+                                  className={`item ${
+                                    snapshot.isDragging && 'dragging'
+                                  }`}
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
                                   {...provided.dragHandleProps}
                                 >
-                                  {el.name} <button type='button' onClick={() => deleteItem(el.id, key)}>Delete</button> <input type="text" onChange={(e)=> editItem(el.id, key,e.target.value)} />
+                                  {inputState === true ? (<button onClick={()=>setInputState(false)}>{el.name}</button>) :
+                                  (<input
+                                    type="text"
+                                    value={el.name}
+                                    onChange={(e) =>
+                                      editItem(el.id, key, e.target.value)
+                                    }
+                                    onKeyDown={(e) => e.key === 'Enter' && setInputState(true) }
+                                  />)}
+                                  <button
+                                    type="button"
+                                    onClick={() => deleteItem(el.id, key)}
+                                  >
+                                    Delete
+                                  </button>
                                 </div>
-                              )
+                              );
                             }}
                           </Draggable>
-                        )
+                        );
                       })}
                       {provided.placeholder}
                     </div>
-                  )
+                  );
                 }}
               </Droppable>
             </div>
-          )
+          );
         })}
       </DragDropContext>
     </div>
-  )
+  );
 }
 
-export default Todo
+export default Todo;
