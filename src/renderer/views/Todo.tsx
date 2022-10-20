@@ -1,3 +1,5 @@
+/* eslint-disable react/button-has-type */
+/* eslint-disable react/self-closing-comp */
 import React, { useEffect, useState } from 'react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import _ from 'lodash';
@@ -5,7 +7,7 @@ import { v4 } from 'uuid';
 import '../styles/todo.css';
 
 function Todo() {
-  const [inputState, setInputState] = useState(true);
+  const [inputState, setInputState] = useState([true, '']);
   const [text, setText] = useState('');
   const [state, setState] = useState({
     todo: {
@@ -24,7 +26,7 @@ function Todo() {
 
   useEffect(() => {
     const data = localStorage.getItem('todo');
-    if(data){
+    if (data) {
       setState(JSON.parse(data));
     }
   }, []);
@@ -55,14 +57,14 @@ function Todo() {
         0,
         itemCopy
       );
-      
+
       return prev;
     });
     localStorage.setItem('todo', JSON.stringify(state));
   };
 
   const addItem = () => {
-    if(!text) return;
+    if (!text) return;
     setState((prev) => {
       return {
         ...prev,
@@ -80,6 +82,7 @@ function Todo() {
     });
 
     setText('');
+    setInputState([true, '']);
     localStorage.setItem('todo', JSON.stringify(state));
   };
 
@@ -92,7 +95,7 @@ function Todo() {
 
       return prev;
     });
-    localStorage.setItem('todo', JSON.stringify(state));   
+    localStorage.setItem('todo', JSON.stringify(state));
   };
 
   const clearCompleted = () => {
@@ -102,7 +105,7 @@ function Todo() {
 
       return prev;
     });
-    localStorage.setItem('todo', JSON.stringify(state));   
+    localStorage.setItem('todo', JSON.stringify(state));
   };
 
   const editItem = (id, droppableId, value) => {
@@ -118,85 +121,112 @@ function Todo() {
 
       return prev;
     });
-    localStorage.setItem('todo', JSON.stringify(state));   
+    localStorage.setItem('todo', JSON.stringify(state));
   };
 
   return (
     <div className="todo">
-      <div>
+      <div style={{ marginBottom: '20px' }}>
         <input
+          className="add-input"
           type="text"
           value={text}
-          onChange={(e) => {setText(e.target.value)}}
+          onChange={(e) => {
+            setText(e.target.value);
+          }}
+          onKeyDown={(e) =>
+            e.key === 'Enter' &&
+            addItem()
+          }
         />
-        <button type="button" onClick={addItem}>
+        <button type="button" className="top-button1 button" onClick={addItem}>
           Add
         </button>
-        <button type="button" onClick={clearCompleted}>
+        <button
+          type="button"
+          className="top-button2 button"
+          onClick={clearCompleted}
+        >
           Clear Completed
         </button>
       </div>
-      <DragDropContext onDragEnd={handleDragEnd}>
-        {_.map(state, (data, key) => {
-          return (
-            <div key={key} className="column">
-              <h3>{data.title}</h3>
-              <Droppable droppableId={key}>
-                {(provided, snapshot) => {
-                  return (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.droppableProps}
-                      className="droppable-col"
-                    >
-                      {data.items.map((el, index) => {
-                        return (
-                          <Draggable
-                            key={el.id}
-                            index={index}
-                            draggableId={el.id}
-                          >
-                            {(provided, snapshot) => {
-                              console.log(snapshot);
-                              return (
-                                <div
-                                  className={`item ${
-                                    snapshot.isDragging && 'dragging'
-                                  }`}
-                                  ref={provided.innerRef}
-                                  {...provided.draggableProps}
-                                  {...provided.dragHandleProps}
-                                >
-                                  {inputState === true ? (<button onClick={()=>setInputState(false)}>{el.name}</button>) :
-                                  (<input
-                                    type="text"
-                                    value={el.name}
-                                    onChange={(e) =>
-                                      editItem(el.id, key, e.target.value)
-                                    }
-                                    onKeyDown={(e) => e.key === 'Enter' && setInputState(true) }
-                                  />)}
-                                  <button
-                                    type="button"
-                                    onClick={() => deleteItem(el.id, key)}
+      <div className="todo-body">
+        <DragDropContext onDragEnd={handleDragEnd}>
+          {_.map(state, (data, key) => {
+            return (
+              <div key={key} className="column">
+                <h3>{data.title}</h3>
+                <Droppable droppableId={key}>
+                  {(provided, snapshot) => {
+                    return (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.droppableProps}
+                        className="droppable-col"
+                      >
+                        {data.items.map((el, index) => {
+                          return (
+                            <Draggable
+                              key={el.id}
+                              index={index}
+                              draggableId={el.id}
+                            >
+                              {(provided, snapshot) => {
+                                return (
+                                  <div
+                                    className={`item ${
+                                      snapshot.isDragging && 'dragging'
+                                    }`}
+                                    ref={provided.innerRef}
+                                    {...provided.draggableProps}
+                                    {...provided.dragHandleProps}
                                   >
-                                    Delete
-                                  </button>
-                                </div>
-                              );
-                            }}
-                          </Draggable>
-                        );
-                      })}
-                      {provided.placeholder}
-                    </div>
-                  );
-                }}
-              </Droppable>
-            </div>
-          );
-        })}
-      </DragDropContext>
+                                    {inputState[0] === false && inputState[1] === el.id ? (
+                                      <div className="edit-delete">
+                                      <input
+                                        className="task-title-input"
+                                        value={el.name}
+                                        onChange={(e) =>
+                                          editItem(el.id, key, e.target.value)
+                                        }
+                                        onKeyDown={(e) =>
+                                          el.name !== "" && e.key === 'Enter' &&
+                                          setInputState([true, ''])
+                                        }
+                                      />
+                                      <button
+                                        className="button deleteBtn"
+                                        type="button"
+                                        onClick={() => deleteItem(el.id, key)}
+                                      >
+                                        <i className="fa-solid fa-trash-can"></i>
+                                      </button>
+                                    </div>
+                                      
+                                    ) : (
+                                      <button
+                                        className="task-title"
+                                        onClick={() => setInputState([false, el.id])}
+                                      >
+                                        {el.name}
+                                      </button>
+                                    )}
+                                  </div>
+                                );
+                              }}
+                            </Draggable>
+                          );
+                        })}
+                        {provided.placeholder}
+                      </div>
+                    );
+                  }}
+                </Droppable>
+              </div>
+            );
+          })}
+        </DragDropContext>
+      </div>
     </div>
   );
 }

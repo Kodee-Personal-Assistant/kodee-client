@@ -33,14 +33,14 @@ const Home = () => {
               target="_blank"
               rel="noreferrer"
             >
-              <button type="button">
+              <button className='button' type="button">
                 <span role="img" aria-label="books">
                   📚
                 </span>
                 Read our docs
               </button>
             </a>
-              <button type="button" onClick={getNotification}>
+              <button className='button' type="button" onClick={getNotification}>
                 <span role="img" aria-label="folded hands">
                   🙏
                 </span>
@@ -48,7 +48,7 @@ const Home = () => {
               </button>
               
               <Link to="/todo">
-                <button type="button">
+                <button className='button' type="button">
                   TODO
                 </button>
               </Link>
